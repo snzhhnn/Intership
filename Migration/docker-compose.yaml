@@ -1,0 +1,37 @@
+services:
+  migration-service:
+    build: .
+    container_name: migration-service
+    ports:
+      - "8082:8082"
+    environment:
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=root
+      - DATABASE_HOST=localhost
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=migration
+    networks:
+      - app-network
+    restart: always
+
+  postgres:
+    image: postgres:17.1
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - DATABASE_NAME=migration
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - postgres_data:/data/db
+    networks:
+      - app-network
+    restart: always
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
