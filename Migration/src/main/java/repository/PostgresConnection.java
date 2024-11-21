@@ -1,3 +1,5 @@
+package repository;
+
 import lombok.Getter;
 import utils.PropertiesUtils;
 
@@ -21,9 +23,7 @@ public class PostgresConnection {
         try {
             defineConnectionParameters();
             connection = DriverManager.getConnection(databaseURL, databaseUser, databasePassword);
-            System.out.println("Connection to PostgreSQL database established successfully.");
         } catch (SQLException e) {
-            System.err.println("Connection failed:");
             e.printStackTrace();
         } catch (IOException e) {
             throw new RuntimeException(e);
