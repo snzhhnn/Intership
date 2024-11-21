@@ -1,47 +1,39 @@
-import java.io.FileInputStream;
+import lombok.Getter;
+import utils.PropertiesUtils;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 
+@Getter
 public class PostgresConnection {
     private Connection connection;
-    private static String databaseUser;
+    private static String databaseUser ;
     private static String databasePassword;
     private static String databaseURL;
-
-    public Connection getConnection() {
-        return connection;
-    }
 
     public PostgresConnection() {
         init();
     }
 
     public void init() {
-//        try {
-//            defineConnectionParameters();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
         try {
-            Class.forName("org.postgresql.Driver");
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/migration", "postgres", "postgres");
+            defineConnectionParameters();
+            connection = DriverManager.getConnection(databaseURL, databaseUser, databasePassword);
             System.out.println("Connection to PostgreSQL database established successfully.");
         } catch (SQLException e) {
-            System.err.println(("Connection failed:"));
+            System.err.println("Connection failed:");
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void defineConnectionParameters() throws IOException {
-        Properties properties = new Properties();
-        properties.load(new FileInputStream("src/main/resources/application.properties"));
-        databaseUser = "root";
-        databasePassword = "root";
-        databaseURL = "jdbc:postgresql://localhost:5432/migration";
+        PropertiesUtils propertiesUtils = new PropertiesUtils();
+        databaseUser = propertiesUtils.getProperty("database.user");
+        databasePassword = propertiesUtils.getProperty("database.password");
+        databaseURL = propertiesUtils.getProperty("database.url");
     }
 }

@@ -17,17 +17,16 @@ public class MigrationTool {
         PostgresConnection postgresConnection = new PostgresConnection();
         Connection connection = postgresConnection.getConnection();
         Statement statement = connection.createStatement();
-        statement.execute("CREATE TABLE schema_history (" +
-                "id int PRIMARY KEY, " +
+        statement.execute("CREATE TABLE IF NOT EXISTS schema_history (" +
+                "id serial PRIMARY KEY , " +
                 "version int not null," +
                 "description varchar not null," +
                 "script varchar not null, " +
                 "type varchar not null, " +
-                "checksum int null, " +
-                "installed_by varchar not null," +
-                "success boolean DEFAULT false)");
+                "checksum varchar not null, " +
+                "installed_by varchar," +
+                "success boolean)");
         statement.close();
-        connection.close();
     }
 
     public static void readMigrationFile() {
