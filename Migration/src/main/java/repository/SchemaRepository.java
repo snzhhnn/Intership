@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SchemaRepository {
-    private final Connection connection = new PostgresConnection().getConnection();
+    private final Connection connection = PostgresConnection.getInstance().getConnection();
 
     public void createTable()  {
         try {
@@ -18,11 +18,11 @@ public class SchemaRepository {
                     "id serial PRIMARY KEY , " +
                     "version int not null," +
                     "description varchar not null," +
-                    "script varchar not null, " +
+                    "script varchar(255) not null, " +
                     "type varchar not null, " +
                     "checksum varchar not null, " +
                     "installed_by varchar," +
-                    "success boolean)");
+                    "success boolean) ");
             statement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -32,19 +32,36 @@ public class SchemaRepository {
     public void save(Schema schema) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO schema_history(version, description, script, type, checksum, installed_by, success) VALUES(?,?,?,?,?,?,?);");
+                    "INSERT INTO schema_history(version, description, script," +
+                            " type, checksum, installed_by, success) " +
+                            "VALUES(?,?,?,?,?,?,?);");
             preparedStatement.setInt(1, schema.getVersion());
             preparedStatement.setString(2, schema.getDescription());
             preparedStatement.setString(3, schema.getScript());
             preparedStatement.setString(4, schema.getType());
             preparedStatement.setString(5, schema.getChecksum());
             preparedStatement.setString(6, "postgresql");
-            preparedStatement.setBoolean(7, schema.isSuccess());
+            preparedStatement.setBoolean(7, false);
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public void update(Schema schema) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "UPDATE schema_history " +
+                            "SET success = ? " +
+                            "WHERE script = ?;");
+            preparedStatement.setBoolean(1, schema.getSuccess());
+            preparedStatement.setString(2, schema.getScript());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public Schema getMigrationByScript(String script) {
         Schema schema = new Schema();

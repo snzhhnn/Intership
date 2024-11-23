@@ -20,10 +20,6 @@ public class PropertiesUtils {
             }
         }
 
-        private void defineProperties() {
-
-        }
-
     public String getProperty(String key) {
         return properties.getProperty(key);
     }

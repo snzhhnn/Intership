@@ -1,5 +1,6 @@
 
-import repository.MigrationRepository;
+import migration.MigrationExecutor;
+import migration.MigrationFileReader;
 import repository.SchemaRepository;
 
 import java.sql.SQLException;
@@ -19,7 +20,7 @@ public class MigrationTool {
 
     public static void readMigrationFile() {
         try {
-            new MigrationFileReader(new SchemaRepository(), new MigrationRepository());
+            new MigrationFileReader(new SchemaRepository(), new MigrationExecutor());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

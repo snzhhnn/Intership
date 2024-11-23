@@ -15,5 +15,6 @@ public class Schema {
     private String type;
     private String checksum;
     private String installedBy;
-    private boolean success;
+    private Boolean success;
+    private String sql;
 }
