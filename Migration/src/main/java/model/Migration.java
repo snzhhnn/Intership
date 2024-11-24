@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Schema {
+public class Migration {
     private int id;
     private int version;
     private String description;

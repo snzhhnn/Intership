@@ -1,8 +1,9 @@
 package migration;
 
 import lombok.extern.slf4j.Slf4j;
-import model.Schema;
-import repository.SchemaRepository;
+import model.Migration;
+import org.flywaydb.core.Flyway;
+import repository.MigrationRepository;
 import utils.ExtractUtils;
 import utils.PropertiesUtils;
 
@@ -16,63 +17,63 @@ import java.sql.SQLException;
 @Slf4j
 public class MigrationFileReader {
 
-    private final SchemaRepository repo;
+    private final MigrationRepository repo;
     private final MigrationExecutor migrationExecutor;
 
-    public MigrationFileReader(SchemaRepository schemaRepository, MigrationExecutor migrationExecutor) throws SQLException {
-        this.repo = schemaRepository;
+    public MigrationFileReader(MigrationRepository migrationRepository, MigrationExecutor migrationExecutor) throws SQLException {
+        this.repo = migrationRepository;
         this.migrationExecutor = migrationExecutor;
         this.init();
     }
 
     public void init() throws SQLException {
-        Schema[] schemas = readMigrationFile(readNameFiles());
-        for (Schema schema: schemas) {
+        Migration[] migrations = readMigrationFile(readNameFiles());
+        for (Migration migration : migrations) {
 
-            if (compareSum(schema.getChecksum(), schema.getScript())) {
-                break;
+            if (compareSum(migration.getChecksum(), migration.getScript())) {
+                continue;
             }
 
-            repo.save(schema);
+            repo.save(migration);
             try {
-                migrationExecutor.execute(schema.getSql());
-                schema.setSuccess(true);
-                repo.update(schema);
+                migrationExecutor.execute(migration.getSql());
+                migration.setSuccess(true);
+                repo.update(migration);
             } catch (IOException e) {
-                schema.setSuccess(false);
-                repo.update(schema);
+                migration.setSuccess(false);
+                repo.update(migration);
                 e.printStackTrace();
             }
         }
     }
 
     private boolean compareSum(String checksum, String shortName) {
-        Schema schema = repo.getMigrationByScript(shortName);
-        if (schema.getChecksum() == null) {
+        Migration migration = repo.getMigrationByScript(shortName);
+        if (migration.getChecksum() == null) {
             return false;
-        } else if (schema.getChecksum().equals(checksum)) {
-            log.warn("migration was executed");
+        } else if (migration.getChecksum().equals(checksum)) {
+            log.warn("migration " + migration.getScript() + " was executed");
             return true;
         }
         return true;
     }
 
 
-    private Schema[] readMigrationFile(File[] listOfFiles)  {
+    private Migration[] readMigrationFile(File[] listOfFiles)  {
         String script = "";
         String prefix = null;
-        Schema[] schemas = new Schema[listOfFiles.length];
+        Migration[] migrations = new Migration[listOfFiles.length];
         for (int i=0; i< listOfFiles.length; i++) {
             script = listOfFiles[i].getName();
             ExtractUtils.extractPrefix(script, prefix);
-            schemas[i] = (createSchema(script, defineChecksum(listOfFiles[i]), ExtractUtils.extractSQL(listOfFiles[i])));
+            migrations[i] = (createSchema(script, defineChecksum(listOfFiles[i]), ExtractUtils.extractSQL(listOfFiles[i])));
         }
-        return schemas;
+        return migrations;
     }
 
 
-    private Schema createSchema(String script, String checksum, String sql) {
-        return Schema.builder()
+    private Migration createSchema(String script, String checksum, String sql) {
+        return Migration.builder()
                 .version(Integer.parseInt(ExtractUtils.extractVersion(script)))
                 .description(ExtractUtils.extractDescription(script))
                 .script(script)
