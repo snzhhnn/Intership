@@ -1,8 +1,8 @@
 package migration;
 
+import connection.ConnectionManager;
 import lombok.extern.slf4j.Slf4j;
 import model.Migration;
-import org.flywaydb.core.Flyway;
 import repository.MigrationRepository;
 import utils.ExtractUtils;
 import utils.PropertiesUtils;
@@ -19,10 +19,12 @@ public class MigrationFileReader {
 
     private final MigrationRepository repo;
     private final MigrationExecutor migrationExecutor;
+    private static String databaseType;
 
     public MigrationFileReader(MigrationRepository migrationRepository, MigrationExecutor migrationExecutor) throws SQLException {
         this.repo = migrationRepository;
         this.migrationExecutor = migrationExecutor;
+        databaseType = ConnectionManager.getDatabaseType();
         this.init();
     }
 
@@ -78,7 +80,7 @@ public class MigrationFileReader {
                 .script(script)
                 .type(ExtractUtils.extractType(script))
                 .checksum(checksum)
-                .installedBy("postgresql")
+                .installedBy(databaseType)
                 .sql(sql)
                 .build();
     }

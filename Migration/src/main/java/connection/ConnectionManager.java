@@ -8,13 +8,15 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-@Getter
+
 public class ConnectionManager {
     private static ConnectionManager connectionManager;
+    @Getter
     private Connection connection;
     private static String databaseUser;
     private static String databasePassword;
     private static String databaseURL;
+    @Getter
     private static String databaseType;
 
     private ConnectionManager() {
@@ -32,7 +34,9 @@ public class ConnectionManager {
         defineConnectionParameters();
         try {
             connection = DriverManager.getConnection(databaseURL, databaseUser, databasePassword);
-            databaseType = getDatabaseType();
+            connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            databaseType = defineDatabaseType();
+            connection.setAutoCommit(false);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -45,7 +49,7 @@ public class ConnectionManager {
         databaseURL = propertiesUtils.getProperty("database.url");
     }
 
-    private String getDatabaseType() throws SQLException {
+    private String defineDatabaseType() throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
         String databaseProductName = metaData.getDatabaseProductName().toLowerCase();
 

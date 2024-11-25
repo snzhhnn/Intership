@@ -2,6 +2,7 @@ package migration;
 
 import connection.ConnectionManager;
 import exception.InvalidSQLException;
+import exception.MigrationExecutedException;
 import lombok.extern.slf4j.Slf4j;
 import org.postgresql.util.PSQLException;
 
@@ -21,9 +22,10 @@ public class MigrationExecutor {
             statement.execute(sql);
             log.info("migration completed successfully ");
         } catch (PSQLException e) {
+            connection.commit();
             connection.rollback();
             log.error("all migration was roll back");
-            throw new InvalidSQLException();
+            throw new MigrationExecutedException();
         }
     }
 }
