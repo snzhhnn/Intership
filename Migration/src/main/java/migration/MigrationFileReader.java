@@ -61,11 +61,10 @@ public class MigrationFileReader {
 
     private Migration[] readMigrationFile(File[] listOfFiles)  {
         String script = "";
-        String prefix = null;
         Migration[] migrations = new Migration[listOfFiles.length];
         for (int i=0; i< listOfFiles.length; i++) {
             script = listOfFiles[i].getName();
-            ExtractUtils.extractPrefix(script, prefix);
+            ExtractUtils.extractPrefix(script);
             migrations[i] = (createSchema(script, defineChecksum(listOfFiles[i]), ExtractUtils.extractSQL(listOfFiles[i])));
         }
         return migrations;
@@ -95,7 +94,7 @@ public class MigrationFileReader {
 
     private static File[] readNameFiles() {
         PropertiesUtils propertiesUtils = new PropertiesUtils();
-        File folder = new File(propertiesUtils.getProperty("catalog.migration.name"));
+        File folder = new File(propertiesUtils.getProperty("db/migration"));
         return folder.listFiles();
     }
 }

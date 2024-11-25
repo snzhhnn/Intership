@@ -8,10 +8,14 @@ public class PropertiesUtils {
         private final Properties properties = new Properties();
 
         public PropertiesUtils() {
-            this.readPropertyFile();
+            try {
+                this.readPropertyFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        private void readPropertyFile() {
+        private void readPropertyFile() throws IOException {
             InputStream in = this.getClass().getClassLoader().getResourceAsStream("application.properties");
             try {
                 properties.load(in);

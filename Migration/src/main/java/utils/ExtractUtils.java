@@ -20,15 +20,13 @@ public class ExtractUtils {
 
     public static String extractType(String shortName) {
         int firstIndex = shortName.indexOf(".");
-        return shortName.substring(firstIndex, shortName.length());
+        return shortName.substring(firstIndex);
     }
 
-    public static void extractPrefix(String script, String prefix) {
+    public static String extractPrefix(String script) {
         if (script.startsWith("V")) {
-            prefix = script.substring(0, 1);
-        }
-
-        if (prefix == null) {
+            return script.substring(0, 1);
+        } else {
             throw new InvalidClassNameException();
         }
     }
